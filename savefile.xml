@@ -1,0 +1,52 @@
+<?xml version="1.0" standalone="no"?>	
+<savefile version="10.0">
+		<playerinfo name="cockmen">
+			<pos x="100" y="300"/>	
+		
+			<level>10</level>
+			<money>1337</money>
+			<xp>77</xp>
+
+		</playerinfo>
+
+		<items> 
+			<item type="Weapon" id="3">
+				<name>grossschwert</name>
+				<stats rarity="green">
+					<atk>10</atk>
+					<def>10</def>
+					<speed>10</speed>
+					<iq>10</iq>
+					<krit>10</krit>
+				</stats>
+
+			</item>
+
+			<item type="Chest" id="2">
+				<name>brigande</name>
+				<stats rarity="blue">
+					<atk>11</atk>
+					<def>30</def>
+					<speed>5</speed>
+					<iq>3</iq>
+					<krit>1</krit>
+				</stats>
+
+			</item>
+
+      <item type="Boots" id="8">
+        <name>hasenschuhe</name>
+        <stats rarity="green">
+          <atk>11</atk>
+          <def>30</def>
+          <speed>5</speed>
+          <iq>3</iq>
+          <krit>1</krit>
+        </stats>
+
+      </item>
+
+
+
+		</items>
+	</savefile>
