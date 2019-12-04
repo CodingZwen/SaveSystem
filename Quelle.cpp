@@ -8,7 +8,7 @@
 
 using namespace std;
 
-enum rarity {GREEN,BLUE,PURPLE};
+enum rarity { GRAY,GREEN,BLUE,PURPLE};
 enum equipType {Weapon,Shield,Head,Chest,Boots,Amulet,Ring};
 
 
@@ -119,6 +119,7 @@ public:
 	void setspeed(int speed) { this->speed= speed; }
 	void setiq(int iq) { this-> iq = iq; }
 	void setkrit(float krit) { this-> krit = krit; }
+	void setname(string name) { this->itemname = name; }
 
 };
 
@@ -148,10 +149,7 @@ class Game
 public :
 	player p;
 	ItemHandler ih;
-
-
-
-
+		   
 };
 
 using namespace std;
@@ -169,27 +167,13 @@ void build_simple_doc()
 	doc.SaveFile("madeByHand.xml");
 }
 
-void build_simple_savefileTemplate()
-{
-	// Make xml: <?xml ..><Hello>World</Hello>
-	TiXmlAttribute attrib;
-
-	TiXmlDocument doc;
-	TiXmlDeclaration * decl = new TiXmlDeclaration("1.0", "", "");
-	TiXmlElement * element = new TiXmlElement("savefile");
-	TiXmlText * text = new TiXmlText("World");
-	element->LinkEndChild(text);
-	doc.LinkEndChild(decl);
-	doc.LinkEndChild(element);
-	doc.SaveFile("madeByHand.xml");
-}
 
 void createSaveFile(player &pl, std::vector<item> &items)
 {
 
 	//brauche ich eigentlich, ich kann mit einer starten
 
-	/* ein handle -> gleich zum gew¸nschtn objekt springen
+	/* ein handle -> gleich zum gew√ºnschtn objekt springen
 	TiXmlElement* element = docH.FirstChildElement( "document" ).FirstChildElement( "Russian" ).Element();
 	*/
 
@@ -231,17 +215,103 @@ void setWeaponType(string &weapontype, item &it)
 
 }
 
-void loadGame(Game &g, string savefilepath)
+
+
+void setWeaponType(const char *weapontype, item &it)
 {
 
 
+	if (weapontype == "Weapon")
+	{
+		it.setType(equipType::Weapon);
+
+	}
+	else if (weapontype == "Shield")
+	{
+		it.setType(equipType::Shield);
+	}
+	else if (weapontype == "Head")
+	{
+		it.setType(equipType::Head);
+	}
+	else if (weapontype == "Boots")
+	{
+		it.setType(equipType::Boots);
+	}
+	else if (weapontype == "Amulet")
+	{
+		it.setType(equipType::Amulet);
+	}
+	else if (weapontype == "Ring")
+	{
+		it.setType(equipType::Ring);
+	}
+	else if (weapontype == "Chest")
+	{
+		it.setType(equipType::Chest);
+	}
+
+}
+
+void setWeaponRarity(string &weaponrarity, item &it)
+{
+	if (weaponrarity == "green")
+	{
+		it.setrarity(rarity::GREEN);
+
+	}
+	else if (weaponrarity == "blue")
+	{
+		it.setrarity(rarity::BLUE);
+	}
+	else if (weaponrarity == "purple")
+	{
+		it.setrarity(rarity::PURPLE);
+	}
+	else  
+	{
+		it.setrarity(rarity::GRAY);
+	}
+	
+}
+
+void setWeaponRarity(const char *weaponrarity, item &it)
+{
+	if (weaponrarity == "green")
+	{
+		it.setrarity(rarity::GREEN);
+
+	}
+	else if (weaponrarity == "blue")
+	{
+		it.setrarity(rarity::BLUE);
+	}
+	else if (weaponrarity == "purple")
+	{
+		it.setrarity(rarity::PURPLE);
+	}
+	else
+	{
+		it.setrarity(rarity::GRAY);
+	}
+
+}
+
+
+
+void loadGame(Game &g, string savefilepath)
+{
+	
 	TiXmlDocument doc(savefilepath.c_str());
-	std::cout << "hats geklappt?" << doc.LoadFile();
-
-
-	TiXmlNode* itemnode = 0;
-	TiXmlElement* ielement = 0;
-	TiXmlAttribute* iattrib = 0;
+	if (doc.LoadFile())
+	{
+		cout << "xml savefile erfolgreich geladen" << endl;
+	}
+	else
+	{
+		cout << "xml file konnte nicht geladen werden\n";
+		return ;
+	}
 
 
 	TiXmlNode* node = 0;
@@ -262,58 +332,69 @@ void loadGame(Game &g, string savefilepath)
 		//wir holens uns vom element das kind und holen uns das kind als knoten
 		node = element->FirstChildElement();
 		assert(node);
-		//dann wieder zu element damit wir lesen kˆnnen
+		//dann wieder zu element damit wir lesen k√∂nnen
 		element = node->ToElement();
 		assert(element);
 		attrib = element->FirstAttribute();
 
 
+		//cout << "Spielername: " << attrib->Name() << endl;
+		cout << "Spielername: " << attrib->Value() << endl;
 
-		cout << "Attributname: " << attrib->Name() << endl;
-		cout << "Attributwert: " << attrib->Value() << endl;
-
-
+		TiXmlNode* itemsnode = 0;
+	
 		//items
-		itemnode = doc.FirstChild("savefile");
-		assert(itemnode);
-		itemnode = itemnode->FirstChild(); //holen uns kind playerinfo
-		assert(itemnode);
-		itemnode = itemnode->NextSibling(); //wir holen uns ITEMS
-		assert(itemnode); //jetzt sollten wir bei items sein
-		itemnode = itemnode->FirstChild();//wir holen uns erstes item kind
-		assert(itemnode);
+		itemsnode = doc.FirstChild("savefile");
+		assert(itemsnode);
+		itemsnode = itemsnode->FirstChild(); //holen uns kind playerinfo
+		assert(itemsnode);
+		itemsnode = itemsnode->NextSibling(); //wir holen uns ITEMS
+		assert(itemsnode); //jetzt sollten wir bei items sein
+		itemsnode = itemsnode->FirstChild();//wir holen uns erstes item kind
+		assert(itemsnode);
 
-		while (itemnode)
+		while (itemsnode)//itemS node, its not the Items but its all items
 		{
 			item it;
-			TiXmlNode* namenode = itemnode->FirstChild(); // am besten weiter zu stats und dann kinder durchgehen
-			TiXmlElement* nameelement = namenode->ToElement();
-			TiXmlDeclaration* decla = namenode->ToDeclaration();
-
-			ielement = itemnode->ToElement();
-			assert(ielement);
-			iattrib = ielement->FirstAttribute(); //type tag zu element gemacht
-
-
-			cout << "Attributname: " << iattrib->Name() << endl;
-			cout << "Attributwert: " << iattrib->Value() << endl;
-
+			TiXmlElement *itemelement = itemsnode->ToElement();
+			assert(itemelement);
 		
-			string weapontype = iattrib->Value();
+			//waffentyp
+			const char *weapontype = itemelement->Attribute("type");
 			setWeaponType(weapontype, it);
+			//waffenid
+			const char *weaponid = itemelement->Attribute("id");
+			string s = weaponid;
+			it.setid(stoi(s));
+			//waffenname
+			const char *weaponname = itemelement->Attribute("name");
+			it.setname(weaponname);
+			const char *rarity = itemelement->Attribute("rarity");
+			setWeaponRarity(rarity, it);
+
+			//stats
+			TiXmlElement *statselement  = itemsnode->FirstChild()->ToElement();
+			assert(statselement);
+		
+			int atk, def, speed, iq; float krit;
+			statselement->QueryIntAttribute("atk", &atk); // If this fails, original value is left as-is
+			statselement->QueryIntAttribute("def", &def);
+			statselement->QueryIntAttribute("speed", &speed);
+			statselement->QueryIntAttribute("iq", &iq);
+			statselement->QueryFloatAttribute("krit", &krit);
 			
+			
+			it.setatk(atk);
+			it.setdef(def);
+			it.setspeed(speed);
+			it.setiq(iq);
+			it.setkrit(krit);
 
-			string id = ielement->Attribute("id");
-			it.setid(stoi(id));
+			g.ih.pushitem(it);
 
-
-			itemnode = itemnode->NextSibling();
+			itemsnode = itemsnode->NextSibling();
 
 		}
-
-
-
-
 
 		//	doc.Print(stdout);
 	}
@@ -330,96 +411,16 @@ int main(int argc, char *args[])
 {
 	srand(time(NULL));
 
-
+	const string savefile = "savefile.xml";
 	Game g;
 
-	build_simple_doc();
+	
+	loadGame(g, savefile);
 
-	TiXmlDocument doc("savefile.xml");
-	std::cout << "hats geklappt?" << doc.LoadFile();
+	system("pause");
 
+	g.ih.printcurrentitems();
 
-	TiXmlNode* itemnode = 0;
-	TiXmlElement* ielement = 0;
-	TiXmlAttribute* iattrib = 0;
-
-
-	TiXmlNode* node = 0;
-	TiXmlElement* element = 0;
-	TiXmlAttribute* attrib = 0;
-
-	if (doc.LoadFile())
-
-	{
-		//playerinfo name etc
-
-		//wir holen uns wurzek
-		node = doc.FirstChild("savefile");
-		assert(node);
-		//wir holen uns die wurzel als element
-		element = node->ToElement();
-		assert(element);
-		//wir holens uns vom element das kind und holen uns das kind als knoten
-		node = element->FirstChildElement();
-		assert(node);
-		//dann wieder zu element damit wir lesen kˆnnen
-		element = node->ToElement();
-		assert(element);
-		attrib = element->FirstAttribute();
-
-
-
-		cout << "Attributname: " << attrib->Name() << endl;
-		cout << "Attributwert: " << attrib->Value() << endl;
-
-
-		//items
-		itemnode = doc.FirstChild("savefile");
-		assert(itemnode);
-		itemnode = itemnode->FirstChild(); //holen uns kind playerinfo
-		assert(itemnode);
-		itemnode = itemnode->NextSibling(); //wir holen uns ITEMS
-		assert(itemnode); //jetzt sollten wir bei items sein
-		itemnode = itemnode->FirstChild();//wir holen uns erstes item kind
-		assert(itemnode);
-
-		while (itemnode)
-		{
-			item it;
-			TiXmlNode* namenode = itemnode->FirstChild(); // am besten weiter zu stats und dann kinder durchgehen
-			TiXmlElement* nameelement = namenode->ToElement();
-			//TiXmlDeclaration* decla = namenode->ToDeclaration();
-
-			ielement = itemnode->ToElement();
-			assert(ielement);
-			iattrib = ielement->FirstAttribute(); //type tag zu element gemacht
-
-			/*
-			//cout << "Attributname: " << iattrib->Name() << endl;
-			//cout << "Attributwert: " << iattrib->Value() << endl;
-			*/
-
-
-			cout << "nameelement: " << nameelement->GetText() << endl;
-
-			string weapontype = iattrib->Value();
-			setWeaponType(weapontype, it);
-
-
-			string id = ielement->Attribute("id");
-			it.setid(stoi(id));
-
-
-			itemnode = itemnode->NextSibling();
-
-		}
-
-
-
-
-
-		//	doc.Print(stdout);
-	}
 	system("pause");
 
 
