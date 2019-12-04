@@ -1,24 +1,22 @@
 #include <vector>
-#include "tinystr.h"
-#include "tinyxml.h"
 #include <iostream>
 #include <string>
 #include <stdlib.h>
 #include <time.h>
+
+#include "tinystr.h"
+#include "tinyxml.h"
 
 using namespace std;
 
 enum rarity { GRAY,GREEN,BLUE,PURPLE};
 enum equipType {Weapon,Shield,Head,Chest,Boots,Amulet,Ring};
 
-
 struct player
 {
-
 	int x, y,money;
 	int level;
 	string name;
-
 
 	player() {
 		x = 0, y = 0;
@@ -458,11 +456,8 @@ void ItemHandler::pushrandomitems()
 
 void ItemHandler::printcurrentitems()
 {
-
-	for (unsigned int i = 0; i < items.size(); i++) {
 	
-		
-		items[i].printstats();
+	for(auto &e : items)
+		e.printstats();
 	
-	}
 }
