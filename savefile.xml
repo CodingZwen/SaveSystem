@@ -1,22 +1,22 @@
 <?xml version="1.0" standalone="no"?>	
 <savefile version="10.0">
 		<playerinfo name="sven">
-			<pos x="100" y="300"/>
-      <stats level="10" money="1337" xp="77"> </stats>    
+		  <pos x="100" y="300"/>
+      		  <stats level="10" money="1337" xp="77"> </stats>    
 		</playerinfo>
 
 		<items> 
 			<item type="Weapon" id="3" rarity="green" name="grossschwert">
-        <stats atk="10" def="10" speed="11" iq="13" krit="1.5"/>
+			        <stats atk="10" def="10" speed="11" iq="13" krit="1.5"/>
 			</item>
 
-      <item type="Weapon" id="3" rarity="green" name="grossschwert">
-        <stats atk="10" def="10" speed="11" iq="13" krit="1.5"/>
-      </item>
+      			<item type="Weapon" id="3" rarity="green" name="grossschwert">
+        			<stats atk="10" def="10" speed="11" iq="13" krit="1.5"/>
+      			</item>
 
-      <item type="Weapon" id="3" rarity="green" name="grossschwert">
-        <stats atk="10" def="10" speed="11" iq="13" krit="1.5"/>
-      </item>
+      			<item type="Weapon" id="3" rarity="green" name="grossschwert">
+        			<stats atk="10" def="10" speed="11" iq="13" krit="1.5"/>
+      			</item>
 
 		</items>
-	</savefile>
+</savefile>
