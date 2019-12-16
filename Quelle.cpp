@@ -1,22 +1,24 @@
 #include <vector>
+#include "tinystr.h"
+#include "tinyxml.h"
 #include <iostream>
 #include <string>
 #include <stdlib.h>
 #include <time.h>
-
-#include "tinystr.h"
-#include "tinyxml.h"
 
 using namespace std;
 
 enum rarity { GRAY,GREEN,BLUE,PURPLE};
 enum equipType {Weapon,Shield,Head,Chest,Boots,Amulet,Ring};
 
+
 struct player
 {
-	int x, y,money;
+
+	int x, y, money, xp;
 	int level;
 	string name;
+
 
 	player() {
 		x = 0, y = 0;
@@ -38,8 +40,10 @@ struct player
 	int getX() { return x; }
 	int getY() { return y; }
 	int getLevel() { return level; }
-	const string &getname() const { return name; }
+	const string &getnameS() const { return name; }
+	const char *getname() const { return name.c_str(); }
 	int getMoney() { return money; }
+	unsigned int getXP() { return xp; }
 
 };
 
@@ -101,7 +105,7 @@ public:
 		return itemname;
 	}
 
-
+	
 	unsigned int getid() { return id; }
 	unsigned int getatk() { return attack; }
 	unsigned int getdef() { return def; }
@@ -134,6 +138,9 @@ public:
 	void pushrandomitems();
 	void printcurrentitems();
 
+
+	const vector<item> &getItems() { return items; }
+
 	ItemHandler() {};
 	~ItemHandler() {};
 
@@ -150,7 +157,7 @@ public :
 		   
 };
 
-using namespace std;
+
 
 void build_simple_doc()
 {
@@ -301,43 +308,37 @@ void loadGame(Game &g, string savefilepath)
 {
 	
 	TiXmlDocument doc(savefilepath.c_str());
-	if (doc.LoadFile())
-	{
-		cout << "xml savefile erfolgreich geladen" << endl;
-	}
-	else
-	{
-		cout << "xml file konnte nicht geladen werden\n";
-		return ;
-	}
+
+	if (doc.LoadFile())	cout << "xml savefile erfolgreich geladen" << endl;
+	else{		cout << "xml file konnte nicht geladen werden\n";		return ;}
 
 
-	TiXmlNode* node = 0;
-	TiXmlElement* element = 0;
-	TiXmlAttribute* attrib = 0;
 
 	if (doc.LoadFile())
-
 	{
+
+		TiXmlNode* playernode = 0;
+		TiXmlElement* playerelement = 0;
 		//playerinfo name etc
 		
 		//wir holen uns wurzek
-		node = doc.FirstChild("savefile");
-		assert(node);
-		//wir holen uns die wurzel als element
-		element = node->ToElement();
-		assert(element);
-		//wir holens uns vom element das kind und holen uns das kind als knoten
-		node = element->FirstChildElement();
-		assert(node);
-		//dann wieder zu element damit wir lesen können
-		element = node->ToElement();
-		assert(element);
-		attrib = element->FirstAttribute();
+		playernode = doc.FirstChild("savefile")->FirstChild(); //solten bei playerinfo sein
+		assert(playernode);
+		playerelement = playernode->ToElement();
+		const char *playername = playerelement->Attribute("name"); //name geholt
+	
+		TiXmlElement *posElement = playernode->FirstChild()->ToElement();
+		int posx, posy;
+		posElement->QueryIntAttribute("x", &posx);
+		posElement->QueryIntAttribute("y", &posy);
 
+		TiXmlElement *statsElement = playernode->FirstChild()->NextSibling()->ToElement();
+		assert(statsElement);
+		int level, money, xp;
+		statsElement->QueryIntAttribute("level", &level);
+		statsElement->QueryIntAttribute("money", &money);
+		statsElement->QueryIntAttribute("xp", &xp);
 
-		//cout << "Spielername: " << attrib->Name() << endl;
-		cout << "Spielername: " << attrib->Value() << endl;
 
 		TiXmlNode* itemsnode = 0;
 	
@@ -381,7 +382,6 @@ void loadGame(Game &g, string savefilepath)
 			statselement->QueryIntAttribute("iq", &iq);
 			statselement->QueryFloatAttribute("krit", &krit);
 			
-			
 			it.setatk(atk);
 			it.setdef(def);
 			it.setspeed(speed);
@@ -393,15 +393,78 @@ void loadGame(Game &g, string savefilepath)
 			itemsnode = itemsnode->NextSibling();
 
 		}
-
-		//	doc.Print(stdout);
 	}
 }
 
-
-void create_savefile()
+//http://www.grinninglizard.com/tinyxmldocs/tutorial0.html
+void create_savefile(Game &g)
 {
+	TiXmlDocument doc;
 
+	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "no");
+	doc.LinkEndChild(decl);
+
+	TiXmlElement * root = new TiXmlElement("savefile");
+	doc.LinkEndChild(root);
+
+
+	TiXmlElement * playerinfo = new TiXmlElement("playerinfo");
+	root->LinkEndChild(playerinfo);
+	playerinfo->SetAttribute("name", g.p.getname());
+
+
+	TiXmlElement* pos;
+	pos = new TiXmlElement("pos");
+	playerinfo->LinkEndChild(pos);
+	pos->SetAttribute("x", std::to_string(g.p.getX()).c_str());
+	pos->SetAttribute("y", std::to_string(g.p.getY()).c_str());
+
+	pos = new TiXmlElement("stats");
+	playerinfo->LinkEndChild(pos);
+	pos->SetAttribute("level", std::to_string(g.p.getLevel()).c_str());
+	pos->SetAttribute("money", std::to_string(g.p.getMoney()).c_str());
+	pos->SetAttribute("xp", std::to_string(g.p.getXP()).c_str());
+	
+
+	TiXmlElement * items = new TiXmlElement("items");
+	root->LinkEndChild(items);
+
+
+	const vector<item> vitems = g.ih.getItems();
+	
+	for(auto const &e : vitems)
+	{ 
+	
+		item currentitem = e;
+
+		TiXmlElement * item;
+		item = new TiXmlElement("item");
+		items->LinkEndChild(item);
+		item->SetAttribute("type", "Weapon");
+		item->SetAttribute("id", currentitem.getid());
+		item->SetAttribute("rarity", "green"); //just test, need getrarity function from items as string return shit
+		item->SetAttribute("name", currentitem.getname().c_str());
+		
+		
+
+		TiXmlElement * stats;
+		stats = new TiXmlElement("stats");
+		item->LinkEndChild(stats);
+		stats->SetAttribute("atk", currentitem.getatk());
+		stats->SetAttribute("def", currentitem.getdef());
+		stats->SetAttribute("speed", currentitem.getspeed());
+		stats->SetAttribute("iq", currentitem.getiq());
+		stats->SetAttribute("krit", std::to_string(currentitem.getkrit()).c_str()); //saved as string because setattribute takes as int if parameter
+	
+
+
+	
+	}
+
+	
+
+
+	doc.SaveFile("newsavefile.xml");
 }
 
 
@@ -412,8 +475,11 @@ int main(int argc, char *args[])
 	const string savefile = "savefile.xml";
 	Game g;
 
-	
 	loadGame(g, savefile);
+
+	create_savefile(g);
+	
+	
 
 	system("pause");
 
@@ -456,8 +522,11 @@ void ItemHandler::pushrandomitems()
 
 void ItemHandler::printcurrentitems()
 {
+
+	for (unsigned int i = 0; i < items.size(); i++) {
 	
-	for(auto &e : items)
-		e.printstats();
+		
+		items[i].printstats();
 	
+	}
 }
